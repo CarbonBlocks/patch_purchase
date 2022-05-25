@@ -4,11 +4,14 @@ export default function handler(req, res) {
   // res.status(200).json({ name: "John Doe" });
   const { quantity } = req.query;
   // console.log(req.method);
+  /*
   if (req.method != "POST") {
     res.status(405).json({ err: "only post allowed" });
   } else {
     createPatchOrder(quantity).then((data) => res.status(200).json(data));
   }
+  */
+  createPatchOrder(quantity).then((data) => res.status(200).json(data));
 }
 // let order1 = createPatchOrder(500).then((order1) => console.log(order1));
 
