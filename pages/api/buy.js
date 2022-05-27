@@ -8,6 +8,7 @@ import {
 } from "@apollo/client";
 import { v5 as uuid } from "uuid";
 import { NAMESPACE_UUID } from "../../consts";
+import JSONBig from "json-bigint";
 
 // Define mutation
 const ADD_PROJECT = gql`
@@ -92,12 +93,14 @@ export default async function handler(req, res) {
   });
 
   const purchaseId = purchaseAdd.data.insert_purchase.returning[0].id;
-  res.status(201).json({
-    success: true,
-    data: {
-      id: Number(`0x${purchaseId.replace(/-/g, "")}`),
-    },
-  });
+  res.status(201).send(
+    JSONBig.stringify({
+      success: true,
+      data: {
+        id: BigInt(`0x${purchaseId.replace(/-/g, "")}`),
+      },
+    })
+  );
 }
 
 const Patch = require("@patch-technology/patch").default;
