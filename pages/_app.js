@@ -6,13 +6,16 @@ import {
   useQuery,
   gql,
 } from "@apollo/client";
+import { useMemo } from "react";
+import { GRAPHQL_URL } from "../consts";
 
 function MyApp({ Component, pageProps }) {
   const client = useMemo(
-    new ApolloClient({
-      uri: "https://patch-purchase.hasura.app/v1/graphql",
-      cache: new InMemoryCache(),
-    }),
+    () =>
+      new ApolloClient({
+        uri: GRAPHQL_URL,
+        cache: new InMemoryCache(),
+      }),
     []
   );
   return (
