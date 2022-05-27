@@ -91,7 +91,9 @@ export default async function handler(req, res) {
     },
   });
 
-  res.status(201).json(order);
+  res.status(201).json({
+    id: purchaseAdd.data.insert_purchase.returning[0].id,
+  });
 }
 
 const Patch = require("@patch-technology/patch").default;
