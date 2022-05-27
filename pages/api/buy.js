@@ -1,68 +1,13 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { gql, HttpLink, useMutation } from "@apollo/client";
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  useQuery,
-} from "@apollo/client";
-import { v5 as uuid } from "uuid";
-import { NAMESPACE_UUID } from "../../consts";
-import JSONBig from "json-bigint";
+import { Web3Storage, Blob, File } from "web3.storage";
+import Patch from "@patch-technology/patch";
 
-// Define mutation
-const ADD_PROJECT = gql`
-  mutation AddProject($name: String, $patch_id: String) {
-    insert_project(
-      objects: { name: $name, patch_id: $patch_id }
-      on_conflict: { constraint: projects_name_key, update_columns: [name] }
-    ) {
-      returning {
-        id
-      }
-    }
-  }
-`;
-
-const ADD_PURCHASE = gql`
-  mutation AddPurchase(
-    $id: uuid
-    $mass_g: Int
-    $registry_url: String
-    $project_id: uuid
-  ) {
-    insert_purchase(
-      objects: {
-        id: $id
-        mass_g: $mass_g
-        registry_url: $registry_url
-        project_id: $project_id
-      }
-    ) {
-      returning {
-        id
-      }
-    }
-  }
-`;
-
-const authToken = process.env.HASURA_ADMIN_SECRET;
+const patch = Patch(process.env.PATCH_API_KEY);
 
 export default async function handler(req, res) {
-  const { quantity = 100, block } = req.query;
-  if (!block) {
-    throw new Error("must set block");
+  const { price } = req.query;
+  if (!price) {
+    throw new Error("must set price");
   }
-  const id = uuid(block, NAMESPACE_UUID);
-  const client = new ApolloClient({
-    link: new HttpLink({
-      uri: process.env.GRAPHQL_URL,
-      headers: {
-        "x-hasura-admin-secret": authToken,
-      },
-    }),
-    cache: new InMemoryCache(),
-  });
 
   /*
   if (req.method != "POST") {
@@ -72,39 +17,31 @@ export default async function handler(req, res) {
   }
   */
 
-  const order = await createPatchOrder(quantity);
+  const order = await createPatchOrder(price);
 
-  const projectAdd = await client.mutate({
-    mutation: ADD_PROJECT,
-    variables: {
-      name: order.data.inventory[0].project.name,
-      patch_id: order.data.inventory[0].project.id,
-    },
+  const project = order.data.inventory.shift().project.name;
+  const { mass_g, registry_url } = order.data;
+  const metadata = {
+    name: `${mass_g}g of ${project}`,
+    image:
+      "ipfs://bafybeiaiezebtrtxvpyqtbalq2t4j7d3zivqu2ptc6hk42uwbf7cnblsqu/snap2022-02-26-03-00-49.png",
+    animation_url: registry_url,
+  };
+  // console.log({ metadata });
+  const storage = new Web3Storage({ token: process.env.STORAGE_API_KEY });
+  const blob = new Blob([JSON.stringify(metadata)], {
+    type: "application/json",
   });
-
-  const purchaseAdd = await client.mutate({
-    mutation: ADD_PURCHASE,
-    variables: {
-      id,
+  const cid = await storage.put([new File([blob], "metadata.json")]);
+  res.status(201).json({
+    success: true,
+    data: {
       mass_g: order.data.mass_g,
-      registry_url: order.data.registry_url,
-      project_id: projectAdd.data.insert_project.returning[0].id,
+      token_uri: `ipfs://${cid}/metadata.json`,
+      project,
     },
   });
-
-  const purchaseId = purchaseAdd.data.insert_purchase.returning[0].id;
-  res.status(201).send(
-    JSONBig.stringify({
-      success: true,
-      data: {
-        id: Number(`0x${purchaseId.replace(/-/g, "")}`),
-      },
-    })
-  );
 }
-
-const Patch = require("@patch-technology/patch").default;
-const patch = Patch(process.env.PATCH_API_KEY);
 
 let createPatchOrder = async (_totalPrice) => {
   try {
@@ -119,4 +56,3 @@ let createPatchOrder = async (_totalPrice) => {
     console.log(err);
   }
 };
-// module.exports = createPatchOrder;
