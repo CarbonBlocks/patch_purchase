@@ -92,7 +92,10 @@ export default async function handler(req, res) {
   });
 
   res.status(201).json({
-    id: purchaseAdd.data.insert_purchase.returning[0].id,
+    success: true,
+    data: {
+      id: purchaseAdd.data.insert_purchase.returning[0].id,
+    },
   });
 }
 
