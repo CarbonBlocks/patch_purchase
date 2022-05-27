@@ -91,10 +91,11 @@ export default async function handler(req, res) {
     },
   });
 
+  const purchaseId = purchaseAdd.data.insert_purchase.returning[0].id;
   res.status(201).json({
     success: true,
     data: {
-      id: purchaseAdd.data.insert_purchase.returning[0].id,
+      id: Number(`0x${purchaseId.replace(/-/g, "")}`),
     },
   });
 }
