@@ -97,7 +97,7 @@ export default async function handler(req, res) {
     JSONBig.stringify({
       success: true,
       data: {
-        id: BigInt(`0x${purchaseId.replace(/-/g, "")}`),
+        id: Number(`0x${purchaseId.replace(/-/g, "")}`),
       },
     })
   );
