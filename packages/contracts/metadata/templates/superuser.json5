@@ -1,0 +1,15 @@
+{
+  name: '’Chievemints Superuser',
+  description: 'A holder of this token has permission to perform nearly all the functions on the ’chievemints NFT contract.\n\nThey are not able to transfer other user’s ’chievemints.',
+  decimals: 0,
+  external_url: 'https://metafam.github.io/chievemints/',
+  image: "ipfs://{assets-cid}/cop's hat.svg",
+  background_color: 'D2BBFF',
+  properties: {},
+  attributes: [
+    {
+      trait_type: 'Token Type',
+      value: 'Permission Gating',
+    },
+  ],
+}

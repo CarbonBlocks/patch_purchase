@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["node"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    // "noEmit": true,
+    "esModuleInterop": true,
+    // "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "outDir": "dist"
+  },
+  "references": [],
+  "include": ["scripts", "test/**/*", "**/*.d.ts"],
+  "files": ["hardhat.config.ts"],
+  "exclude": [],
+  "ts-node": {
+    "compilerOptions": {
+      // "module": "esnext",
+    }
+  }
+}

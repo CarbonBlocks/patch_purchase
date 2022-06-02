@@ -1,28 +1,71 @@
 {
   "name": "patch_purchase",
-  "version": "0.1.0",
+  "author": {
+    "name": "dysbulic",
+    "name1": "akigs"
+  },
+  "version": "0.3.0",
+  "license": "CC0-1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "ui:start": "yarn workspace @patch_purchase/ui dev",
+    "ui:test": "yarn workspace @patch_purchase/ui test",
+    "ui:pub": "yarn workspace @patch_purchase/ui pub",
+    "ui:build": "yarn workspace @patch_purchase/ui build",
+    "fork": "yarn workspace @patch_purchase/contracts fork",
+    "hh:node": "yarn workspace @patch_purchase/contracts chain",
+    "hh:build": "yarn workspace @patch_purchase/contracts compile",
+    "hh:deploy": "yarn workspace @patch_purchase/contracts deploy",
+    "hh:publish": "yarn workspace @patch_purchase/contracts publish",
+    "hh:watch": "yarn workspace @patch_purchase/contracts watch",
+    "hh:account": "yarn workspace @patch_purchase/contracts account",
+    "hh:accounts": "yarn workspace @patch_purchase/contracts accounts",
+    "hh:balance": "yarn workspace @patch_purchase/contracts balance",
+    "hh:console": "yarn workspace @patch_purchase/contracts hardhat console",
+    "hh:test": "yarn workspace @patch_purchase/contracts hardhat test --network localhost",
+    "send": "yarn workspace @patch_purchase/contracts send",
+    "ship": "yarn workspace @patch_purchase/ui ship",
+    "hh:gen": "yarn workspace @patch_purchase/contracts generate",
+    "hh:mine": "yarn workspace @patch_purchase/contracts hardhat mineContractAddress",
+    "hh:wallet": "yarn workspace @patch_purchase/contracts hardhat wallet",
+    "hh:funded": "yarn workspace @patch_purchase/contracts hardhat fundedwallet",
+    "clean": "yarn workspace @patch_purchase/ui clean",
+    "clean:full": "yarn clean && rm -rf node_modules/ packages/ui/node_modules/ packages/contracts/node_modules/",
+    "graph:run-node": "cd docker/graph-node && docker-compose up",
+    "graph:remove-node": "cd docker/graph-node && docker-compose down",
+    "graph:prepare": "mustache packages/subgraph/config/config.json packages/subgraph/src/subgraph.template.yaml > packages/subgraph/subgraph.yaml",
+    "graph:codegen": "yarn workspace @scaffold-eth/subgraph graph codegen",
+    "graph:build": "yarn workspace @scaffold-eth/subgraph graph build",
+    "graph:create-local": "yarn workspace @scaffold-eth/subgraph graph create --node http://localhost:8020/ scaffold-eth/your-contract",
+    "graph:remove-local": "yarn workspace @scaffold-eth/subgraph graph remove --node http://localhost:8020/ scaffold-eth/your-contract",
+    "graph:deploy-local": "yarn workspace @scaffold-eth/subgraph graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 scaffold-eth/your-contract",
+    "graph:ship-local": "yarn graph:prepare && yarn graph:codegen && yarn graph:deploy-local",
+    "deploy-and-graph": "yarn deploy && yarn graph:ship-local",
+    "ui:theme": "yarn workspace @patch_purchase/ui theme",
+    "ui:watch": "yarn workspace @patch_purchase/ui watch"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "packageManager": "yarn@3.2.0",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.2.0",
+    "@types/eslint": "^8",
+    "@types/testing-library__jest-dom": "^5",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "8.12.0",
+    "jest": "^28.0.3",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.7.2"
   },
   "dependencies": {
-    "@apollo/client": "^3.6.5",
-    "@patch-technology/patch": "^1.22.0",
-    "graphql": "^16.5.0",
-    "json-bigint": "^1.0.0",
-    "netlify-cli": "^10.3.1",
-    "next": "12.1.6",
-    "react": "18.1.0",
-    "react-dom": "18.1.0",
-    "uuid": "^8.3.2",
-    "web3.storage": "^4.2.0"
-  },
-  "devDependencies": {
-    "@netlify/plugin-nextjs": "^4.7.0",
-    "eslint": "8.16.0",
-    "eslint-config-next": "12.1.6"
+    "@apollo/client": "^3.6.4",
+    "bip39": "^3.0.4",
+    "ethers": "^5.6.8",
+    "graphql": "^16.5.0"
   }
 }
