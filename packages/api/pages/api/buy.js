@@ -4,11 +4,11 @@ import Patch from "@patch-technology/patch";
 const patch = Patch(process.env.PATCH_API_KEY);
 
 export default async function handler(req, res) {
-  const { price, projectId } = req.query;
+  const { price, patchProjectId } = req.query;
   if (!price) {
     throw new Error("must set price");
   }
-  if (!projectId) {
+  if (!patchProjectId) {
     // projectId = [pro_test_9fdc93f66dba9cdfacbceac9f2648a01]
     throw new Error("enter a project id");
   }
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   }
   */
 
-  const order = await createPatchOrder(price, projectId);
+  const order = await createPatchOrder(price, patchProjectId);
 
   //display patch projects
   //console.log(await patch.projects.retrieveProjects());
@@ -66,13 +66,13 @@ export default async function handler(req, res) {
   });
 }
 
-let createPatchOrder = async (totalPrice, projectId) => {
+let createPatchOrder = async (totalPrice, patchProjectId) => {
   try {
     const currency = "USD";
     const order = await patch.orders.createOrder({
       total_price: totalPrice,
       currency: currency,
-      project_id: projectId,
+      project_id: patchProjectId,
     });
     return order;
   } catch (err) {

@@ -18,11 +18,7 @@ contract GenericLargeResponse is ChainlinkClient {
   using Chainlink for Chainlink.Request;
 
   mapping (uint256 => ProjectOFT) public tokens;
-
-  bytes public data;
-  string public token_uri;
-  uint256 public mass_g;
-  // string public projectId = "44";
+  uint256 public count;
 
   constructor(
   ) {
@@ -31,50 +27,61 @@ contract GenericLargeResponse is ChainlinkClient {
   }
 
 
-  function requestMultiVariable(uint256 priceCost, string memory projectId) public
+  function executeBuy(uint256 priceCost, string memory patchProjectId) public
   {
-    bytes32 specId = "e2112f96866a4cf293df5d16b0cbf7fd";
+    bytes32 jobId = "1e4915771e4d4985a72de8d9507b2023";
     
     string memory price = Strings.toString(priceCost);
 
     uint256 payment = 0;
-    Chainlink.Request memory req = buildChainlinkRequest(specId, address(this), this.fulfillBytes.selector);
+    Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfillBytes.selector);
     req.add("get", string(abi.encodePacked(
-      "https://patchpurchase.netlify.app/api/buy?price=", price, "&projectId=", projectId
+      "https://patchpurchase.netlify.app/api/buy?price=", price, "&patchProjectId=", patchProjectId
     )));
-    //req.add("get", "https://patchpurchase.netlify.app/api/buy?price=82");
     req.add("path1", "data,token_uri");
     req.add("path2", "data,mass_g");
     req.add("path3", "data,project");
     sendOperatorRequest(req, payment);
+    count++;
   }
 
-  event RequestFulfilled(
+  event PurchaseFulfilled(
     bytes32 indexed requestId,
-    bytes indexed data,
+    bytes indexed tokenURI,
     uint256 mass_g,
-    string project
+    string indexed project
   );
 
 
   function fulfillBytes(
     bytes32 requestId,
-    bytes memory bytesData,
-    uint256 _mass_g,
+    bytes memory tokenURI,
+    uint256 mass_g,
     string calldata project
   )
     public
     recordChainlinkFulfillment(requestId)
   {
+    emit PurchaseFulfilled(requestId, tokenURI, mass_g, project);
     uint256 projectId = uint(keccak256(bytes(project)));
     ProjectOFT token = tokens[projectId];
     if (address(token) == address(0)){
-      token = tokens[projectId] = new ProjectOFT(project, "ABC", 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8);
+      token = tokens[projectId] = new ProjectOFT(
+        project, "CBT", 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8
+      );
     }
-    token.mint(msg.sender, _mass_g);
-    emit RequestFulfilled(requestId, bytesData, _mass_g, project);
-    data = bytesData;
-    token_uri = string(data);
-    mass_g = _mass_g;
+    token.mint(msg.sender, mass_g);
+    //data = bytesData;
+    // string memory token_uri = string(tokenURI);
+    //mass_g = _mass_g;
+    count++;
+  }
+  
+  function balanceOf(address owner, string calldata project) public view returns(uint256 balance) {
+    return balanceOf(owner, uint256(keccak256(bytes(project))));
+  }
+
+  function balanceOf(address owner, uint256 projectId) public view returns(uint256 balance) {
+    balance = tokens[projectId].balanceOf(owner);
   }
 }
