@@ -22,6 +22,7 @@ contract PatchBuyer is PriceConsumerV3, GenericLargeResponse {
         //price = Strings.toString(cost  - 2);
 
         executeBuy(priceInPenny, patchProjectId);
+        // executeBuy();
         return true;
     }
 }

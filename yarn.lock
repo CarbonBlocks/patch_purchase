@@ -1576,9 +1576,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@layerzerolabs/solidity-examples@https://github.com/akigler/layer-zero-solidity-examples":
+"@layerzerolabs/solidity-examples@https://github.com/CarbonBlocks/layer-zero-solidity-examples":
   version: 0.0.2
-  resolution: "@layerzerolabs/solidity-examples@https://github.com/akigler/layer-zero-solidity-examples.git#commit=ceeee5e558c48461a1eaf417f522309c5bfb90b4"
+  resolution: "@layerzerolabs/solidity-examples@https://github.com/CarbonBlocks/layer-zero-solidity-examples.git#commit=ceeee5e558c48461a1eaf417f522309c5bfb90b4"
   dependencies:
     "@openzeppelin/contracts": ^4.4.1
     dotenv: ^10.0.0
@@ -2732,7 +2732,7 @@ __metadata:
     "@ethersproject/abi": ^5
     "@ethersproject/bytes": ^5
     "@ethersproject/providers": ^5
-    "@layerzerolabs/solidity-examples": "https://github.com/akigler/layer-zero-solidity-examples"
+    "@layerzerolabs/solidity-examples": "https://github.com/CarbonBlocks/layer-zero-solidity-examples"
     "@nomiclabs/hardhat-ethers": ^2.0.5
     "@nomiclabs/hardhat-etherscan": ^3.0.3
     "@nomiclabs/hardhat-waffle": ^2.0.3

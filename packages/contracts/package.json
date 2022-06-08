@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.1",
-    "@layerzerolabs/solidity-examples": "https://github.com/akigler/layer-zero-solidity-examples",
+    "@layerzerolabs/solidity-examples": "https://github.com/CarbonBlocks/layer-zero-solidity-examples",
     "@openzeppelin/contracts": "^4.6.0",
     "dotenv": "^16.0.0",
     "esm": "^3.2.25",
@@ -51,7 +51,7 @@
     "test": "hardhat test --network hardhat",
     "compile": "hardhat compile",
     "gating-metadata": "hardhat run scripts/gating-metadata.ts",
-    "deploy": "hardhat run scripts/deploy.ts && yarn publish",
+    "deploy": "hardhat run scripts/deploy.ts",
     "postdeploy": "yarn publish",
     "publish": "hardhat run scripts/publish.ts",
     "watch": "node scripts/watch.js",
