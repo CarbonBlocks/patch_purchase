@@ -2712,7 +2712,7 @@ __metadata:
     "@netlify/plugin-nextjs": ^4.7.0
     "@patch-technology/patch": ^1.22.0
     eslint: 8.16.0
-    eslint-config-next: 12.1.6
+    eslint-config-next: ^12.1.6
     graphql: ^16.5.0
     json-bigint: ^1.0.0
     netlify-cli: ^10.3.1
@@ -8837,7 +8837,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-next@npm:12.1.6":
+"eslint-config-next@npm:^12.1.6":
   version: 12.1.6
   resolution: "eslint-config-next@npm:12.1.6"
   dependencies:
