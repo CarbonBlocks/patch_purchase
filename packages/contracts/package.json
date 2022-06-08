@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.1",
-    "@layerzerolabs/solidity-examples": "file:../../../layer-zero-solidity-examples/",
+    "@layerzerolabs/solidity-examples": "https://github.com/akigler/layer-zero-solidity-examples",
     "@openzeppelin/contracts": "^4.6.0",
     "dotenv": "^16.0.0",
     "esm": "^3.2.25",

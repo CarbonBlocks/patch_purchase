@@ -1576,9 +1576,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@layerzerolabs/solidity-examples@file:../../../layer-zero-solidity-examples/::locator=%40patch_purchase%2Fcontracts%40workspace%3Apackages%2Fcontracts":
+"@layerzerolabs/solidity-examples@https://github.com/akigler/layer-zero-solidity-examples":
   version: 0.0.2
-  resolution: "@layerzerolabs/solidity-examples@file:../../../layer-zero-solidity-examples/#../../../layer-zero-solidity-examples/::hash=c346fb&locator=%40patch_purchase%2Fcontracts%40workspace%3Apackages%2Fcontracts"
+  resolution: "@layerzerolabs/solidity-examples@https://github.com/akigler/layer-zero-solidity-examples.git#commit=ceeee5e558c48461a1eaf417f522309c5bfb90b4"
   dependencies:
     "@openzeppelin/contracts": ^4.4.1
     dotenv: ^10.0.0
@@ -1587,7 +1587,7 @@ __metadata:
     hardhat-deploy: ^0.10.5
     hardhat-deploy-ethers: ^0.3.0-beta.13
     hardhat-gas-reporter: ^1.0.6
-  checksum: ad63d469fe06508cccd5286b4e5016c84849ff973994290d126e96d36de4cf4b26a9a330063454e64275d9e5b52844817ffa13223ef1dbd2db05e518ce716937
+  checksum: 5c3d9b7bcfb1c2dd5ca1ed2d99cbb94389ed6e7501e853652382c420e8ac7c40995b9823566177fe3bc69539d0d2eefc5eb5277e783be74d611e6f76838b0802
   languageName: node
   linkType: hard
 
@@ -2732,7 +2732,7 @@ __metadata:
     "@ethersproject/abi": ^5
     "@ethersproject/bytes": ^5
     "@ethersproject/providers": ^5
-    "@layerzerolabs/solidity-examples": "file:../../../layer-zero-solidity-examples/"
+    "@layerzerolabs/solidity-examples": "https://github.com/akigler/layer-zero-solidity-examples"
     "@nomiclabs/hardhat-ethers": ^2.0.5
     "@nomiclabs/hardhat-etherscan": ^3.0.3
     "@nomiclabs/hardhat-waffle": ^2.0.3
@@ -22044,11 +22044,11 @@ __metadata:
 
 "typescript@patch:typescript@^4.5.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.5.5#~builtin<compat/typescript>, typescript@patch:typescript@^4.7.2#~builtin<compat/typescript>":
   version: 4.7.2
-  resolution: "typescript@patch:typescript@npm%3A4.7.2#~builtin<compat/typescript>::version=4.7.2&hash=bda367"
+  resolution: "typescript@patch:typescript@npm%3A4.7.2#~builtin<compat/typescript>::version=4.7.2&hash=7ad353"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 09d93fc0983d38eadd9b0427f790b49b4437f45002a87d447be3fbe53120880e87a91dd03e1d900498f99205d6e0b7c9784fe41fca11d56f4bbce371f74bb160
+  checksum: 7e2b9a9f4a70fb7616f1b0d986977f8e34a74f046202fa7f24fdee79589598277810fa216b3776c20c0683a9235872c73be34fdb93f67f98c1efaca40999422f
   languageName: node
   linkType: hard
 
