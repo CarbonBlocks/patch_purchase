@@ -5,6 +5,7 @@ import chaiAsPromised from "chai-as-promised";
 import chaiMatch from "chai-match";
 import { ethers as Ethers, Signer } from "ethers";
 import { ethers, upgrades } from "hardhat";
+import { chainlinkConfig } from "../consts";
 
 chai.use(chaiAsPromised);
 chai.use(chaiMatch);
@@ -31,25 +32,28 @@ beforeEach(async () => {
 
   const factory = await ethers.getContractFactory("PatchBuyer");
 
-  const tokenAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
-  const oracleAddress = owner.address;
-  const tx = await factory.deploy(tokenAddress, oracleAddress);
+  const { token, oracle } = chainlinkConfig.mumbai;
+  const tx = await factory.deploy(token, oracle);
   deployed = await tx.deployed();
 });
 
 describe("The Patch Purchaser", () => {
   const project = "Patch's Mineralization Test Offset Project";
   const symbol = "PMP";
+  const patchProjectId = "pro_test_9fdc93f66dba9cdfacbceac9f2648a01";
   const ipfs =
     "ipfs://bafybeibh576cyb7xnhifgaxqbndtaphvgontingmfuvg2neewgth2khcsm/metadata.json";
-  it("should mint OFT in response to carbon purchased", async () => {
+  it.only("should mint OFT in response to carbon purchased", async () => {
     // console.log({ deployed });
     // expect(await deployed.owner()).to.equal(owner.address);
 
     let tx = await deployed.generateOFT(project, symbol);
     const receipt = await tx.wait();
 
-    tx = await deployed.buy(,);
+    tx = await deployed.buy(patchProjectId, { value: 1n * 10n ** 17n });
+    console.log("waiting 10 blocks");
+    await tx.wait(10);
+
     // console.log(Buffer.from(ipfs).toString("hex"));
     // // const encoder = new TextEncoder();
     // tx = await deployed.fulfillBytes(
@@ -64,9 +68,9 @@ describe("The Patch Purchaser", () => {
       owner.address,
       project
     );
-    expect(balance).to.equal(15);
-    console.log(balance);
-  });
+    console.log(`balance: ${balance}`);
+    expect(Number(balance)).to.be.greaterThan(0);
+  }).timeout(5 * 60 * 1000);
   it("shouldnt revert when calling execute buy", async () => {
     // console.log({ deployed });
     // expect(await deployed.owner()).to.equal(owner.address);

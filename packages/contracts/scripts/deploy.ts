@@ -6,6 +6,7 @@ import { utils, Contract, BigNumber } from "ethers";
 import R from "ramda";
 import { hrtime } from "process";
 // import { Maybe } from '../../ui/lib/types'
+import { chainlinkConfig } from "../consts";
 
 const name = "PatchBuyer";
 
@@ -14,12 +15,6 @@ const debug = (...info: Array<unknown>) => {
   if (DEBUG) console.debug(...info);
 };
 
-const chainlinkConfig = {
-  mumbai: {
-    token: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-    oracle: "0xedaa6962Cf1368a92e244DdC11aaC49c0A0acC37",
-  },
-};
 const chain = process.env.HARDHAT_NETWORK ?? config.defaultNetwork;
 
 const main = async () => {
