@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import { GenericLargeResponse } from "./PatchPurchaseChainlink.sol";
+import { PatchBridge } from "./PatchPurchaseChainlink.sol";
 import { PriceConsumerV3 } from "./MATICUSDMumbaiPrice.sol";
 
 
 
-contract PatchBuyer is PriceConsumerV3, GenericLargeResponse {
+contract PatchBuyer is PriceConsumerV3, PatchBridge {
     uint public priceInPenny;
+
+    constructor(
+        address chainlinkToken,
+        address chainlinkOracle
+    ) PatchBridge(chainlinkToken, chainlinkOracle){}
 
     function buy(string memory patchProjectId) public payable returns(bool) {
         require(

@@ -31,27 +31,40 @@ beforeEach(async () => {
 
   const factory = await ethers.getContractFactory("PatchBuyer");
 
-  const tx = await factory.deploy();
+  const tokenAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
+  const oracleAddress = owner.address;
+  const tx = await factory.deploy(tokenAddress, oracleAddress);
   deployed = await tx.deployed();
 });
 
 describe("The Patch Purchaser", () => {
-  it("shouldnt revert when calling fullfill bytes", async () => {
+  const project = "Patch's Mineralization Test Offset Project";
+  const symbol = "PMP";
+  const ipfs =
+    "ipfs://bafybeibh576cyb7xnhifgaxqbndtaphvgontingmfuvg2neewgth2khcsm/metadata.json";
+  it("should mint OFT in response to carbon purchased", async () => {
     // console.log({ deployed });
     // expect(await deployed.owner()).to.equal(owner.address);
 
-    const tx = await deployed.fulfillBytes(
-      "0x690d038d84e3a6e4819ac0db5392b973a51cdfa1159accd41500281ad3d299a7",
-      "0x697066733a2f2f62616679626569626835373663796237786e68696667617871626e647461706876676f6e74696e676d66757667326e656577677468326b6863736d2f6d657461646174612e6a736f6e",
-      1500,
-      "Patch's Mineralization Test Offset Project"
-    );
-
+    let tx = await deployed.generateOFT(project, symbol);
     const receipt = await tx.wait();
+
+    tx = await deployed.buy(,);
+    // console.log(Buffer.from(ipfs).toString("hex"));
+    // // const encoder = new TextEncoder();
+    // tx = await deployed.fulfillBytes(
+    //   `0x${"0".repeat(64)}`,
+    //   `0x${Buffer.from(ipfs).toString("hex")}`,
+    //   15,
+    //   project
+    // );
+    // await tx.wait();
+
     const balance = await deployed["balanceOf(address,string)"](
       owner.address,
-      "Patch's Mineralization Test Offset Project"
+      project
     );
+    expect(balance).to.equal(15);
     console.log(balance);
   });
   it("shouldnt revert when calling execute buy", async () => {

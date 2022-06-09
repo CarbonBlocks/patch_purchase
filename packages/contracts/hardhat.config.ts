@@ -4,7 +4,6 @@ import fs from "fs";
 import glob from "glob";
 import chalk from "chalk";
 import { task } from "hardhat/config";
-import "@tenderly/hardhat-tenderly";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
@@ -76,11 +75,11 @@ const config: HardhatUserConfig = {
       url: `https://goerli.infura.io/v3/${infuraId}`,
       accounts: { mnemonic },
     },
-    xdai: {
-      url: "https://rpc.xdaichain.com/",
-      gasPrice: 1000000000,
-      accounts: { mnemonic },
-    },
+    // xdai: {
+    //   url: "https://rpc.xdaichain.com/",
+    //   gasPrice: 1000000000,
+    //   accounts: { mnemonic },
+    // },
     polygon: {
       url: "https://polygon-rpc.com",
       accounts: { mnemonic },
@@ -388,47 +387,47 @@ task("wallet", "Create a wallet (pk) link", async (_, { ethers }) => {
 // })
 
 ///////this is the task
-task(
-  "account",
-  "Get balance information for the deployment account.",
-  async (_, { ethers }) => {
-    const { hdkey } = await import("ethereumjs-wallet");
-    const bip39 = await import("bip39");
-    let mnemonic = fs.readFileSync("./mnemonic.txt").toString().trim();
-    const seed = await bip39.mnemonicToSeed(mnemonic);
-    const hdwallet = hdkey.fromMasterSeed(seed);
-    // const wallet_hdpath = "m/44'/60'/0'/0/";
-    // const account_index = 0;
-    // let fullPath = wallet_hdpath + account_index;
-    // debug("fullPath", fullPath);
+// task(
+//   "account",
+//   "Get balance information for the deployment account.",
+//   async (_, { ethers }) => {
+//     const { hdkey } = await import("ethereumjs-wallet");
+//     const bip39 = await import("bip39");
+//     let mnemonic = fs.readFileSync("./mnemonic.txt").toString().trim();
+//     const seed = await bip39.mnemonicToSeed(mnemonic);
+//     const hdwallet = hdkey.fromMasterSeed(seed);
+//     // const wallet_hdpath = "m/44'/60'/0'/0/";
+//     // const account_index = 0;
+//     // let fullPath = wallet_hdpath + account_index;
+//     // debug("fullPath", fullPath);
 
-    // const wallet = hdwallet.derivePath(fullPath).getWallet();
-    const wallet = hdwallet.getWallet();
+//     // const wallet = hdwallet.derivePath(fullPath).getWallet();
+//     const wallet = hdwallet.getWallet();
 
-    // const privateKey = "0x" + wallet._privKey.toString("hex");
-    var EthUtil = await import("ethereumjs-util");
-    const address = wallet.getAddressString();
-    console.log(typeof address);
-    // "0x" + EthUtil.privateToAddress(wallet._privKey).toString("hex");
+//     // const privateKey = "0x" + wallet._privKey.toString("hex");
+//     var EthUtil = await import("ethereumjs-util");
+//     const address = wallet.getAddressString();
+//     console.log(typeof address);
+//     // "0x" + EthUtil.privateToAddress(wallet._privKey).toString("hex");
 
-    var qrcode = await import("qrcode-terminal");
-    qrcode.generate(address);
-    console.log(` ‍📬 Deployer Account is ${address}`);
-    for (let n in config.networks) {
-      try {
-        let provider = new ethers.providers.JsonRpcProvider(
-          (config.networks[n] as HttpNetworkConfig).url
-        );
-        let balance = await provider.getBalance(address);
-        console.log(` -- ${n} --  -- -- 📡`);
-        console.log(`   balance: ${ethers.utils.formatEther(balance)}`);
-        console.log(`   nonce: ${await provider.getTransactionCount(address)}`);
-      } catch (error) {
-        if (DEBUG) console.error({ error });
-      }
-    }
-  }
-);
+//     var qrcode = await import("qrcode-terminal");
+//     qrcode.generate(address);
+//     console.log(` ‍📬 Deployer Account is ${address}`);
+//     for (let n in config.networks) {
+//       try {
+//         let provider = new ethers.providers.JsonRpcProvider(
+//           (config.networks[n] as HttpNetworkConfig).url
+//         );
+//         let balance = await provider.getBalance(address);
+//         console.log(` -- ${n} --  -- -- 📡`);
+//         console.log(`   balance: ${ethers.utils.formatEther(balance)}`);
+//         console.log(`   nonce: ${await provider.getTransactionCount(address)}`);
+//       } catch (error) {
+//         if (DEBUG) console.error({ error });
+//       }
+//     }
+//   }
+// );
 
 const addr = async (ethers: HardhatEthersHelpers, addr: string) => {
   if (isAddress(addr)) {
@@ -539,6 +538,7 @@ task("sign", "Sign the contents of a file")
 
 task("acct", "account alt").setAction(async (_args, { ethers }) => {
   const address = (await ethers.getSigners())[0].address;
+  console.log(`account address: ${address}`);
   for (let n in config.networks) {
     try {
       let provider = new ethers.providers.JsonRpcProvider(

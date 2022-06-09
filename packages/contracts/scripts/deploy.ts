@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
-import { config, ethers, tenderly, run, upgrades, network } from "hardhat";
-import { utils, Contract } from "ethers";
+import { config, ethers, run, upgrades, network } from "hardhat";
+import { utils, Contract, BigNumber } from "ethers";
 import R from "ramda";
 import { hrtime } from "process";
 // import { Maybe } from '../../ui/lib/types'
@@ -14,29 +14,22 @@ const debug = (...info: Array<unknown>) => {
   if (DEBUG) console.debug(...info);
 };
 
+const chainlinkConfig = {
+  mumbai: {
+    token: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+    oracle: "0xedaa6962Cf1368a92e244DdC11aaC49c0A0acC37",
+  },
+};
 const chain = process.env.HARDHAT_NETWORK ?? config.defaultNetwork;
 
 const main = async () => {
   console.log(`\n\n 📡 Deploying: ${name}…\n`);
 
-  const token = await deploy(name);
+  const args = [chainlinkConfig.mumbai.token, chainlinkConfig.mumbai.oracle];
+  const token = await deploy(name, args);
   await token.deployTransaction.wait(6);
 
-  //const yourContract = await ethers.getContractAt('YourContract', '0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A') //<-- if you want to instantiate a version of a contract at a specific address!
-  //If you want to verify your contract on tenderly.co (see setup details in the scaffold-eth README!)
-  /*
-  await tenderlyVerify(
-    {contractName: 'YourContract',
-     contractAddress: yourContract.address
-  })
-  */
-
   const implementationAddress = token.address;
-
-  // const verification = await tenderlyVerify({
-  //   contract: name,
-  //   address: implementationAddress,
-  // });
 
   try {
     console.log(
@@ -49,7 +42,7 @@ const main = async () => {
     );
     await run("verify:verify", {
       address: implementationAddress,
-      constructorArguments: [],
+      constructorArguments: args,
     });
   } catch (err) {
     console.error((err as Error).message);
@@ -72,7 +65,7 @@ const fileTemplates = {
 
 const deploy = async (
   contract: string,
-  _args = [],
+  _args: Array<string> = [],
   overrides = {},
   libraries = {}
 ) => {
@@ -102,7 +95,9 @@ const deploy = async (
       " creating a new token…"
   );
   const factory = await ethers.getContractFactory(name);
-  const tx = await factory.deploy();
+  const tx = await factory.deploy(...args);
+  // (chainlinkConfig[chain as keyof typeof chain] as {token: string}).token,
+  // chainlinkConfig[chain].oracle
   const deployed = await tx.deployed();
 
   const {
@@ -133,14 +128,13 @@ const deploy = async (
   fs.writeFileSync(files.address, token);
 
   let gasInfo = "𐌵ⲛⲕⲛⲟⲱⲛ";
-  if (typeof gasPrice === "number") {
+  if (typeof gasPrice === "number" || gasPrice instanceof BigNumber) {
     const gasUsed = deployed.deployTransaction.gasLimit.mul(gasPrice);
     gasInfo =
       `${utils.formatEther(gasUsed)} ` +
-      (network.name === "polygon" ? "MATIC" : "ETH");
+      (["polygon", "mumbai"].includes(network.name) ? "MATIC" : "ETH");
   }
-
-  console.log(`\n ⛽ ${chalk.hex("#C6A831")(gasInfo)}`);
+  console.log(`\n ⛽ gas = ${chalk.hex("#C6A831")(gasInfo)}`);
 
   const encoded = abiEncodeArgs(deployed, args);
 
@@ -161,6 +155,7 @@ const deploy = async (
 // useful when you want to manually verify the contracts
 // for example, on Etherscan
 const abiEncodeArgs = (deployed: Contract, args: Array<unknown>) => {
+  // console.log(deployed.interface.deploy.inputs);
   if (args && deployed && R.hasPath(["interface", "deploy"], deployed)) {
     return utils.defaultAbiCoder.encode(deployed.interface.deploy.inputs, args);
   }

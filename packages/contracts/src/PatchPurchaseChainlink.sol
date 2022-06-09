@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@layerzerolabs/solidity-examples/contracts/token/oft/OFT.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ProjectOFT is OFT {
   constructor(string memory name, string memory symbol, address lzEndpoint) OFT(name, symbol, lzEndpoint){
@@ -14,24 +15,40 @@ contract ProjectOFT is OFT {
 
 }
 
-contract GenericLargeResponse is ChainlinkClient {
+contract PatchBridge is ChainlinkClient{
   using Chainlink for Chainlink.Request;
 
   mapping (uint256 => ProjectOFT) public tokens;
+  mapping (bytes32 => address) public initiator;
   uint256 public count;
 
   constructor(
+    address chainlinkToken,
+    address chainlinkOracle
   ) {
-    setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
-    setChainlinkOracle(0xedaa6962Cf1368a92e244DdC11aaC49c0A0acC37);
+    setChainlinkToken(chainlinkToken);
+    setChainlinkOracle(chainlinkOracle);
+
+    // setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
+    // setChainlinkOracle(0xedaa6962Cf1368a92e244DdC11aaC49c0A0acC37);
   }
 
+  function generateOFT(string calldata project, string calldata symbol) public{
+    uint256 projectId = uint(keccak256(bytes(project)));
+    ProjectOFT token = tokens[projectId];
+    if (address(token) == address(0)){
+      token = tokens[projectId] = new ProjectOFT(
+        project, symbol, 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8
+      );
+    }
+    
+  }
 
-  function executeBuy(uint256 priceCost, string memory patchProjectId) public
+  function executeBuy(uint256 priceInPenny, string memory patchProjectId) public
   {
     bytes32 jobId = "1e4915771e4d4985a72de8d9507b2023";
     
-    string memory price = Strings.toString(priceCost);
+    string memory price = Strings.toString(priceInPenny);
 
     uint256 payment = 0;
     Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfillBytes.selector);
@@ -41,7 +58,8 @@ contract GenericLargeResponse is ChainlinkClient {
     req.add("path1", "data,token_uri");
     req.add("path2", "data,mass_g");
     req.add("path3", "data,project");
-    sendOperatorRequest(req, payment);
+    bytes32 requestId = sendChainlinkRequest(req, payment);
+    initiator[requestId] = msg.sender;
     count++;
   }
 
@@ -65,16 +83,7 @@ contract GenericLargeResponse is ChainlinkClient {
     emit PurchaseFulfilled(requestId, tokenURI, uint(mass_g), project);
     uint256 projectId = uint(keccak256(bytes(project)));
     ProjectOFT token = tokens[projectId];
-    if (address(token) == address(0)){
-      token = tokens[projectId] = new ProjectOFT(
-        project, "CBT", 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8
-      );
-    }
-    token.mint(msg.sender, uint(mass_g));
-    //data = bytesData;
-    // string memory token_uri = string(tokenURI);
-    //mass_g = _mass_g;
-    count++;
+    token.mint(initiator[requestId], uint(mass_g));
   }
   
   function balanceOf(address owner, string calldata project) public view returns(uint256 balance) {
@@ -82,7 +91,9 @@ contract GenericLargeResponse is ChainlinkClient {
   }
 
   function balanceOf(address owner, uint256 projectId) public view returns(uint256 balance) {
-    balance = tokens[projectId].balanceOf(owner);
+    ProjectOFT token = tokens[projectId];
+    require(address(token) != address(0), 'projectId not found');
+    return token.balanceOf(owner);
   }
 }
 
