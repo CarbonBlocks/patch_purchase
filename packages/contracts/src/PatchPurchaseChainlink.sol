@@ -3,11 +3,11 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@layerzerolabs/solidity-examples/contracts/token/oft/OFT.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ProjectOFT is OFT {
-  constructor(string memory name, string memory symbol, address lzEndpoint) OFT(name, symbol, lzEndpoint){
+contract ProjectFT is ERC20 {
+  constructor(string memory name, string memory symbol) ERC20(name, symbol){
   }
   function mint(address to, uint256 amount) public {
     _mint(to, amount);
@@ -18,7 +18,7 @@ contract ProjectOFT is OFT {
 contract PatchBridge is ChainlinkClient{
   using Chainlink for Chainlink.Request;
 
-  mapping (uint256 => ProjectOFT) public tokens;
+  mapping (uint256 => ProjectFT) public tokens;
   mapping (bytes32 => address) public initiator;
   uint256 public count;
 
@@ -33,23 +33,25 @@ contract PatchBridge is ChainlinkClient{
     // setChainlinkOracle(0xedaa6962Cf1368a92e244DdC11aaC49c0A0acC37);
   }
 
-  function generateOFT(string calldata project, string calldata symbol) public{
+  function generateFT(string calldata project, string calldata symbol) public{
     uint256 projectId = uint(keccak256(bytes(project)));
-    ProjectOFT token = tokens[projectId];
+    ProjectFT token = tokens[projectId];
     if (address(token) == address(0)){
-      token = tokens[projectId] = new ProjectOFT(
-        project, symbol, 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8
+      token = tokens[projectId] = new ProjectFT(
+        project, symbol
       );
     }
     
   }
+  
+  event PreparingPurchase(uint price, string patchProjectId);
 
   function executeBuy(uint256 priceInPenny, string memory patchProjectId) public
   {
-    bytes32 jobId = "1e4915771e4d4985a72de8d9507b2023";
+    bytes32 jobId = "4ed6d383b8a64b9fb4453b1819f80ff1";
     
     string memory price = Strings.toString(priceInPenny);
-
+    emit PreparingPurchase(priceInPenny, patchProjectId);
     uint256 payment = 0;
     Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfillBytes.selector);
     req.add("get", string(abi.encodePacked(
@@ -63,27 +65,28 @@ contract PatchBridge is ChainlinkClient{
     count++;
   }
 
+
   event PurchaseFulfilled(
     bytes32 indexed requestId,
-    bytes indexed tokenURI,
+    string indexed tokenURI,
     uint256 mass_g,
     string indexed project
   );
 
 
-  function fulfillBytes(
+function fulfillBytes(
     bytes32 requestId,
-    bytes memory tokenURI,
-    int256 mass_g,
+    string calldata tokenURI,
+    uint256 mass_g,
     string calldata project
   )
     public
     recordChainlinkFulfillment(requestId)
   {
-    emit PurchaseFulfilled(requestId, tokenURI, uint(mass_g), project);
+    emit PurchaseFulfilled(requestId, tokenURI, mass_g, project);
     uint256 projectId = uint(keccak256(bytes(project)));
-    ProjectOFT token = tokens[projectId];
-    token.mint(initiator[requestId], uint(mass_g));
+    ProjectFT token = tokens[projectId];
+    token.mint(initiator[requestId], (mass_g * 10**12));
   }
   
   function balanceOf(address owner, string calldata project) public view returns(uint256 balance) {
@@ -91,7 +94,7 @@ contract PatchBridge is ChainlinkClient{
   }
 
   function balanceOf(address owner, uint256 projectId) public view returns(uint256 balance) {
-    ProjectOFT token = tokens[projectId];
+    ProjectFT token = tokens[projectId];
     require(address(token) != address(0), 'projectId not found');
     return token.balanceOf(owner);
   }

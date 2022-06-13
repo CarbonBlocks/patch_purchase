@@ -27,7 +27,7 @@ const transact = async ({
   return await tx?.wait();
 };
 
-beforeEach(async () => {
+before(async () => {
   [owner, creator] = await ethers.getSigners();
 
   const factory = await ethers.getContractFactory("PatchBuyer");
@@ -43,11 +43,11 @@ describe("The Patch Purchaser", () => {
   const patchProjectId = "pro_test_9fdc93f66dba9cdfacbceac9f2648a01";
   const ipfs =
     "ipfs://bafybeibh576cyb7xnhifgaxqbndtaphvgontingmfuvg2neewgth2khcsm/metadata.json";
-  it.only("should mint OFT in response to carbon purchased", async () => {
+  it("should mint FT in response to carbon purchased", async () => {
     // console.log({ deployed });
     // expect(await deployed.owner()).to.equal(owner.address);
 
-    let tx = await deployed.generateOFT(project, symbol);
+    let tx = await deployed.generateFT(project, symbol);
     const receipt = await tx.wait();
 
     tx = await deployed.buy(patchProjectId, { value: 1n * 10n ** 17n });
