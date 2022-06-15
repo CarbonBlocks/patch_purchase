@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./PatchBuyer.sol";
 // import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ProjectFT is ERC20 {
@@ -18,8 +19,14 @@ contract ProjectFT is ERC20 {
 contract PatchBridge is ChainlinkClient{
   using Chainlink for Chainlink.Request;
 
+  struct Purchase {
+      address purchaser;
+      uint256 amount;
+  }
+
+  //ERC20 usdc;
   mapping (uint256 => ProjectFT) public tokens;
-  mapping (bytes32 => address) public initiator;
+  mapping (bytes32 => Purchase) public reciepts;
   uint256 public count;
 
   constructor(
@@ -28,7 +35,8 @@ contract PatchBridge is ChainlinkClient{
   ) {
     setChainlinkToken(chainlinkToken);
     setChainlinkOracle(chainlinkOracle);
-
+    generateFT("Patch's Mineralization Test Offset Project", "PPP");
+    //usdc = ERC20(0xDbc4c91BE4722e54672bCCCB5EAD82C9Bcf356f6);
     // setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
     // setChainlinkOracle(0xedaa6962Cf1368a92e244DdC11aaC49c0A0acC37);
   }
@@ -43,7 +51,7 @@ contract PatchBridge is ChainlinkClient{
     }
     
   }
-  
+
   event PreparingPurchase(uint price, string patchProjectId);
 
   function executeBuy(uint256 priceInPenny, string memory patchProjectId) public
@@ -51,7 +59,7 @@ contract PatchBridge is ChainlinkClient{
     bytes32 jobId = "4ed6d383b8a64b9fb4453b1819f80ff1";
     
     string memory price = Strings.toString(priceInPenny);
-    emit PreparingPurchase(priceInPenny, patchProjectId);
+    //emit PreparingPurchase(priceInPenny, patchProjectId);
     uint256 payment = 0;
     Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfillBytes.selector);
     req.add("get", string(abi.encodePacked(
@@ -61,7 +69,7 @@ contract PatchBridge is ChainlinkClient{
     req.add("path2", "data,mass_g");
     req.add("path3", "data,project");
     bytes32 requestId = sendChainlinkRequest(req, payment);
-    initiator[requestId] = msg.sender;
+    reciepts[requestId] = Purchase(msg.sender, priceInPenny * 10**4);
     count++;
   }
 
@@ -83,10 +91,16 @@ function fulfillBytes(
     public
     recordChainlinkFulfillment(requestId)
   {
-    emit PurchaseFulfilled(requestId, tokenURI, mass_g, project);
-    uint256 projectId = uint(keccak256(bytes(project)));
-    ProjectFT token = tokens[projectId];
-    token.mint(initiator[requestId], (mass_g * 10**12));
+    Purchase memory reciept = reciepts[requestId];
+    if (mass_g == 0){
+        SharedVariables.USDC.transferFrom(address(this), reciept.purchaser, reciept.amount);
+      }
+    else{
+      emit PurchaseFulfilled(requestId, tokenURI, mass_g, project);
+      uint256 projectId = uint(keccak256(bytes(project)));
+      ProjectFT token = tokens[projectId];
+      token.mint(reciept.purchaser, (mass_g * 10**12));
+    }
   }
   
   function balanceOf(address owner, string calldata project) public view returns(uint256 balance) {

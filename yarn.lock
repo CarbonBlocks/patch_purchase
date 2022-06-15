@@ -7593,6 +7593,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"currency_converter@workspace:packages/currency_converter":
+  version: 0.0.0-use.local
+  resolution: "currency_converter@workspace:packages/currency_converter"
+  dependencies:
+    "@netlify/functions": ^1.0.0
+  languageName: unknown
+  linkType: soft
+
 "cyclist@npm:^1.0.1":
   version: 1.0.1
   resolution: "cyclist@npm:1.0.1"

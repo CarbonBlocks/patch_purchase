@@ -4,13 +4,38 @@ import Patch from "@patch-technology/patch";
 const patch = Patch(process.env.PATCH_API_KEY);
 
 export default async function handler(req, res) {
-  const { price, patchProjectId } = req.query;
+  const { price, patchProjectId, key } = req.query;
   if (!price) {
-    throw new Error("must set price");
+    return res.status(400).json({
+      success: false,
+      data: {
+        mass_g: 0,
+        token_uri: `error://price%20not%20set`,
+        project: `error://price%20not%20set`,
+      },
+    });
   }
   if (!patchProjectId) {
     // projectId = [pro_test_9fdc93f66dba9cdfacbceac9f2648a01]
-    throw new Error("enter a project id");
+    // throw new Error("enter a project id");
+    return res.status(404).json({
+      success: false,
+      data: {
+        mass_g: 0,
+        token_uri: `error://project%20not%20found`,
+        project: `error://project%20not%20found`,
+      },
+    });
+  }
+  if (key == null || key !== process.env.BUY_API_KEY) {
+    return res.status(401).json({
+      success: false,
+      data: {
+        mass_g: 0,
+        token_uri: `error://missing%20api%20key`,
+        project: `error://missing%20api%20key`,
+      },
+    });
   }
   /*
   if (req.method != "POST") {
