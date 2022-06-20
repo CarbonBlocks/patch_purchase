@@ -4,7 +4,10 @@ import Patch from "@patch-technology/patch";
 const patch = Patch(process.env.PATCH_API_KEY);
 
 export default async function handler(req, res) {
-  const { price, patchProjectId, key } = req.query;
+  console.log({ req });
+
+  const { key } = req.query;
+  const { price, patchProjectId } = req.body;
   if (!price) {
     return res.status(400).json({
       success: false,
