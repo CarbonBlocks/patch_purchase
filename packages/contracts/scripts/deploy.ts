@@ -14,17 +14,18 @@ const DEBUG = false;
 const debug = (...info: Array<unknown>) => {
   if (DEBUG) console.debug(...info);
 };
+let impl: { new?: string; old?: string } = {};
 
 const chain = process.env.HARDHAT_NETWORK ?? config.defaultNetwork;
 
 const main = async () => {
   console.log(`\n\n 📡 Deploying: ${name}…\n`);
 
-  const args = [chainlinkConfig.mumbai.token, chainlinkConfig.mumbai.oracle];
+  const args: Array<string> = []; //[chainlinkConfig.mumbai.token, chainlinkConfig.mumbai.oracle];
   const token = await deploy(name, args);
   await token.deployTransaction.wait(6);
 
-  const implementationAddress = token.address;
+  const implementationAddress = impl.new;
 
   try {
     console.log(
@@ -81,16 +82,33 @@ const deploy = async (
 
   const args = _args ?? [];
   const artifacts = await ethers.getContractFactory(contract, { libraries });
-
-  let impl: { new?: string; old?: string } = {};
-
-  // if (!fs.existsSync(files.address)) {
-  console.log(
-    `\n 🥂 ${chalk.hex("#FF7D31")(files.address)} doesn't exist;` +
-      " creating a new token…"
-  );
+  let tx;
   const factory = await ethers.getContractFactory(name);
-  const tx = await factory.deploy(...args);
+  if (!fs.existsSync(files.address)) {
+    console.log(
+      `\n 🥂 ${chalk.hex("#FF7D31")(files.address)} doesn't exist;` +
+        " creating a new token…"
+    );
+    tx = await upgrades.deployProxy(factory, args, {
+      kind: "uups",
+      timeout: 10 * 60 * 1000,
+    });
+  } else {
+    const existing = fs.readFileSync(files.address).toString().trim();
+    impl.old = await upgrades.erc1967.getImplementationAddress(existing);
+
+    console.log(
+      `\n ⚇ Existing deployment proxied at ${chalk.hex("#AD4EFF")(existing)}` +
+        ` for implementation ${chalk.hex("#87BED5")(impl.old)};` +
+        " upgrading"
+    );
+    tx = await upgrades.upgradeProxy(existing, artifacts, {
+      kind: "uups",
+      timeout: 10 * 60 * 1000,
+    });
+  }
+  // const tx = await factory.deploy(...args);
+
   // (chainlinkConfig[chain as keyof typeof chain] as {token: string}).token,
   // chainlinkConfig[chain].oracle
   const deployed = await tx.deployed();
@@ -111,6 +129,22 @@ const deploy = async (
   const timeout = 4 * 1000;
   const maxLoops = 25;
   let done = false;
+
+  while (!done && ++loops <= maxLoops) {
+    try {
+      impl.new = await upgrades.erc1967.getImplementationAddress(token);
+    } catch (err) {} // fails if the proxy isn't yet connected
+    done = impl.new != null && impl.old !== impl.new;
+    if (!done) {
+      console.info(
+        ` ${chalk.hex("#FF0606")(loops.toString())}:` +
+          " No new implmentation found at" +
+          ` ${chalk.hex("#FFF013")(token)};` +
+          ` sleeping ${timeout / 1000}s`
+      );
+      await sleep(timeout);
+    }
+  }
 
   console.log(
     `\n 📄 ${chalk.cyan(contract)},` +

@@ -1,10 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "./ChainlinkClient.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-// import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 library SharedVariables {
     ERC20 public constant USDC = ERC20(0xDbc4c91BE4722e54672bCCCB5EAD82C9Bcf356f6);
@@ -20,8 +25,9 @@ contract ProjectFT is ERC20 {
 
 }
 
-contract PatchBridge is ChainlinkClient{
+contract PatchBridge is Initializable, ContextUpgradeable, ERC165Upgradeable, UUPSUpgradeable, ChainlinkClient{
   using Chainlink for Chainlink.Request;
+  using AddressUpgradeable for address;
 
   struct Purchase {
       address purchaser;
@@ -34,13 +40,18 @@ contract PatchBridge is ChainlinkClient{
   mapping (string => bool) public validPatchProjectId;
 
   uint256 public count;
+  uint256 public count3;
 
-  constructor(
-    address chainlinkToken,
-    address chainlinkOracle
-  ) {
-    setChainlinkToken(chainlinkToken);
-    setChainlinkOracle(chainlinkOracle);
+  function initialize(
+    // address chainlinkToken,
+    // address chainlinkOracle
+  ) initializer public {
+    __init_ChainlinkClient();
+    // setChainlinkToken(chainlinkToken);
+    // setChainlinkOracle(chainlinkOracle);
+    setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
+    setChainlinkOracle(0xedaa6962Cf1368a92e244DdC11aaC49c0A0acC37);
+
     //generateFT("Patch's Mineralization Test Offset Project", "PPP");
     //usdc = ERC20(0xDbc4c91BE4722e54672bCCCB5EAD82C9Bcf356f6);
     // setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
@@ -133,5 +144,14 @@ function fulfillBytes(
     ProjectFT token = tokens[projectId];
     require(address(token) != address(0), 'projectId not found');
     return token.balanceOf(owner);
+  }
+  function _authorizeUpgrade(address)
+    internal
+    view
+    override
+  {
+    require(
+      msg.sender == address(0xA40438076c5D9bEE90490870b359398Af73fF880), "You must have a Maintainer token to upgrade the contract."
+    );
   }
 }

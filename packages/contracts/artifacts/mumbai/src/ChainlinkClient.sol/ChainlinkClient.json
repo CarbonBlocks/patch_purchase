@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
   "contractName": "ChainlinkClient",
-  "sourceName": "@chainlink/contracts/src/v0.8/ChainlinkClient.sol",
+  "sourceName": "src/ChainlinkClient.sol",
   "abi": [
     {
       "anonymous": false,
