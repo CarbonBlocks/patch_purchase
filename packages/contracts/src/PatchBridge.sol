@@ -4,8 +4,12 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./PatchBuyer.sol";
 // import "@openzeppelin/contracts/access/Ownable.sol";
+
+library SharedVariables {
+    ERC20 public constant USDC = ERC20(0xDbc4c91BE4722e54672bCCCB5EAD82C9Bcf356f6);
+}
+
 
 contract ProjectFT is ERC20 {
   constructor(string memory name, string memory symbol) ERC20(name, symbol){
@@ -27,6 +31,8 @@ contract PatchBridge is ChainlinkClient{
   //ERC20 usdc;
   mapping (uint256 => ProjectFT) public tokens;
   mapping (bytes32 => Purchase) public reciepts;
+  mapping (string => bool) public validPatchProjectId;
+
   uint256 public count;
 
   constructor(
@@ -35,7 +41,7 @@ contract PatchBridge is ChainlinkClient{
   ) {
     setChainlinkToken(chainlinkToken);
     setChainlinkOracle(chainlinkOracle);
-    generateFT("Patch's Mineralization Test Offset Project", "PPP");
+    //generateFT("Patch's Mineralization Test Offset Project", "PPP");
     //usdc = ERC20(0xDbc4c91BE4722e54672bCCCB5EAD82C9Bcf356f6);
     // setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
     // setChainlinkOracle(0xedaa6962Cf1368a92e244DdC11aaC49c0A0acC37);
@@ -52,19 +58,35 @@ contract PatchBridge is ChainlinkClient{
     
   }
 
+  function addPatchProjectId(string calldata patchProjectId) public {
+    validPatchProjectId[patchProjectId] = true;
+  }
+
   event PreparingPurchase(uint price, string patchProjectId);
 
   function executeBuy(uint256 priceInPenny, string memory patchProjectId) public
   {
+    require(
+        priceInPenny > 0,
+        'Please send value to the transaction'
+    );
+    require(
+        SharedVariables.USDC.transferFrom(msg.sender, address(this), priceInPenny*10**4),
+        'ERC-20 transfer did not succeed'
+    );
+
+    if (!validPatchProjectId[patchProjectId]){
+      revert("invalid patch project id");
+    }
+
     bytes32 jobId = "4ed6d383b8a64b9fb4453b1819f80ff1";
-    
     string memory price = Strings.toString(priceInPenny);
     //emit PreparingPurchase(priceInPenny, patchProjectId);
     uint256 payment = 0;
     Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfillBytes.selector);
-    req.add("get", string(abi.encodePacked(
-      "https://patchpurchase.netlify.app/api/buy?price=", price, "&patchProjectId=", patchProjectId
-    )));
+    //req.add("data", string(abi.encodePacked('{"price":',price,',"patchProjectId":"', patchProjectId,'"}')));
+    req.add("dataInput1", price);
+    req.add("dataInput2", patchProjectId);
     req.add("path1", "data,token_uri");
     req.add("path2", "data,mass_g");
     req.add("path3", "data,project");

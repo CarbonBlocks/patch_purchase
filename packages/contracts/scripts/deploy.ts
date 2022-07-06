@@ -8,7 +8,7 @@ import { hrtime } from "process";
 // import { Maybe } from '../../ui/lib/types'
 import { chainlinkConfig } from "../consts";
 
-const name = "PatchBuyer";
+const name = "PatchBridge";
 
 const DEBUG = false;
 const debug = (...info: Array<unknown>) => {
